@@ -8,6 +8,10 @@
 
 #import "SDView.h"
 
+#import <LocalAuthentication/LocalAuthentication.h>
+
+#define SDShow(fmt, ...) UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"温馨提示" message:[NSString stringWithFormat:fmt,##__VA_ARGS__] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]; [alert show];
+
 @interface SDView ()
 
 @property (nonatomic,strong)NSMutableArray *buttonArray;
@@ -138,5 +142,24 @@
     [[UIColor purpleColor]set];
     CGContextStrokePath(ref);
 }
+//TouchID解锁
+- (void)openLockWithTouchId{
+    LAContext * context = [[LAContext alloc] init];
+    BOOL canUseTouchID = [context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:nil] ;
+    if (canUseTouchID) {
+        [context evaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics localizedReason:@"TouchID解锁" reply:^(BOOL success, NSError * _Nullable error) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (success) {
+                    SDShow(@"验证成功");
+                }else {
+                    SDShow(@"验证失败") ;
+                }
+            });
+        }];
+    }else {
+        NSLog(@"无法使用TouchID");
+    }
+}
+
 
 @end
